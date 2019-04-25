@@ -16,11 +16,11 @@ minimal_mistakes_skin    : "dirt" # "default" # "air", "aqua", "contrast", "dark
 
 # Site Settings
 locale                   : "en-US"
-title                    : "ls notes"
+title                    : "LS Notes"
 title_separator          : "-"
 name                     : &name "Alexander Cherepanov" # &name is a YAML anchor which can be *referenced later
-description              : "Personal blog."
-url                      : "http://lsnotes.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+description              : "Alexander Cherepanov's Personal blog."
+url                      : "https://lsnotes.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "alexintech/alexintech.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
