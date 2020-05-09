@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>tools - Category - ls notes</title>
+        <link>https://lsnotes.com/categories/tools/</link>
+        <description>tools - Category - ls notes</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</managingEditor>
+            <webMaster>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Tue, 12 May 2015 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://lsnotes.com/categories/tools/" rel="self" type="application/rss+xml" /><item>
+    <title>Basic Configuration and Usage of IntelliJ IDEA</title>
+    <link>https://lsnotes.com/2015/05/configure-intellij-idea/</link>
+    <pubDate>Tue, 12 May 2015 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://lsnotes.com/2015/05/configure-intellij-idea/</guid>
+    <description><![CDATA[In this video explained basic configuration of IntelliJ IDEA and usage of important shortcuts. Also we talk about some plugins for IntelliJ IDEA.]]></description>
+</item></channel>
+</rss>

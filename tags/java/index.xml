@@ -1,0 +1,29 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Java - Tag - ls notes</title>
+        <link>https://lsnotes.com/tags/java/</link>
+        <description>Java - Tag - ls notes</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</managingEditor>
+            <webMaster>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 21 Jan 2016 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://lsnotes.com/tags/java/" rel="self" type="application/rss+xml" /><item>
+    <title>Preparation for the OCA Java SE 8 Programmer I Exam</title>
+    <link>https://lsnotes.com/2016/01/preparation-oca-java8-exam/</link>
+    <pubDate>Thu, 21 Jan 2016 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://lsnotes.com/2016/01/preparation-oca-java8-exam/</guid>
+    <description><![CDATA[<p>Recently I have passed the Oracle Certification Assosiate Java SE 8 Programmer I exam and scored 100%. In this short article I post resources that I used for preparation.</p>]]></description>
+</item><item>
+    <title>Using Tomcat for Web Development</title>
+    <link>https://lsnotes.com/2015/05/using-tomcat-for-web-development/</link>
+    <pubDate>Wed, 13 May 2015 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://lsnotes.com/2015/05/using-tomcat-for-web-development/</guid>
+    <description><![CDATA[In this video we will talk about using Tomcat in web development.]]></description>
+</item><item>
+    <title>Основы использования Maven</title>
+    <link>https://lsnotes.com/2015/05/basic-usage-of-maven/</link>
+    <pubDate>Tue, 05 May 2015 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://lsnotes.com/2015/05/basic-usage-of-maven/</guid>
+    <description><![CDATA[В видео рассматривается установка Maven на Mac OS X с помощью пакетного менеджера Homebrew, создание простого проекта в IntelliJ IDEA и использование Maven в IntelliJ IDEA для компиляции проекта.]]></description>
+</item></channel>
+</rss>
