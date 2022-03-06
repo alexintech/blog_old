@@ -4,7 +4,9 @@
         <link>https://lsnotes.com/</link>
         <description>Alexander Cherepanov&#39;s Personal blog.</description>
         <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</managingEditor>
-            <webMaster>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 21 Jan 2016 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://lsnotes.com/" rel="self" type="application/rss+xml" /><item>
+            <webMaster>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 21 Jan 2016 00:00:00 &#43;0000</lastBuildDate>
+            <atom:link href="https://lsnotes.com/index.xml" rel="self" type="application/rss+xml" />
+        <item>
     <title>Preparation for the OCA Java SE 8 Programmer I Exam</title>
     <link>https://lsnotes.com/2016/01/preparation-oca-java8-exam/</link>
     <pubDate>Thu, 21 Jan 2016 00:00:00 &#43;0000</pubDate>
