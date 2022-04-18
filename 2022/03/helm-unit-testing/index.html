@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Unit Testing for Helm Charts - ls notes</title><meta name="Description" content="Alexander Cherepanov&#39;s Personal blog."><meta property="og:title" content="Unit Testing for Helm Charts" />
+<meta property="og:description" content="Helm is a good tool to create common templates for your deployments. But when you start writing complex
+templates testing them manually is unpleasure. Could I use TDD (Test-Driven Development) for
+writing Helm Charts?" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://lsnotes.com/2022/03/helm-unit-testing/" /><meta property="og:image" content="https://lsnotes.com/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-03-22T00:00:00+00:00" />
+<meta property="article:modified_time" content="2022-03-22T00:00:00+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://lsnotes.com/logo.png"/>
+
+<meta name="twitter:title" content="Unit Testing for Helm Charts"/>
+<meta name="twitter:description" content="Helm is a good tool to create common templates for your deployments. But when you start writing complex
+templates testing them manually is unpleasure. Could I use TDD (Test-Driven Development) for
+writing Helm Charts?"/>
+<meta name="application-name" content="LS Notes">
+<meta name="apple-mobile-web-app-title" content="LS Notes"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://lsnotes.com/2022/03/helm-unit-testing/" /><link rel="prev" href="https://lsnotes.com/2016/01/preparation-oca-java8-exam/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Unit Testing for Helm Charts",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/lsnotes.com\/2022\/03\/helm-unit-testing\/"
+        },"genre": "posts","keywords": "Helm, Unit Testing","wordcount":  1963 ,
+        "url": "https:\/\/lsnotes.com\/2022\/03\/helm-unit-testing\/","datePublished": "2022-03-22T00:00:00+00:00","dateModified": "2022-03-22T00:00:00+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "Alexander Cherepanov"},"author": {
+                "@type": "Person",
+                "name": "Alexandr Cherepanov"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="ls notes"><span class="header-title-pre">> </span><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/alexintech" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="ls notes"><span class="header-title-pre">> </span><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/alexintech" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Unit Testing for Helm Charts</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>Alexandr Cherepanov</a></span>&nbsp;<span class="post-category">included in <a href="/categories/helm/"><i class="far fa-folder fa-fw"></i>helm</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="Mar 03, 2022">Mar 03, 2022</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1963 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;10 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#using-helm-unittest-plugin">Using Helm unittest plugin</a>
+      <ul>
+        <li><a href="#first-iteration">First iteration</a></li>
+        <li><a href="#second-iteration">Second iteration</a>
+          <ul>
+            <li><a href="#refactoring">Refactoring</a></li>
+          </ul>
+        </li>
+        <li><a href="#third-iteration">Third iteration</a></li>
+        <li><a href="#forth-iteration">Forth iteration</a></li>
+        <li><a href="#fifth-iteration">Fifth iteration</a></li>
+        <li><a href="#templates-issues">Templates issues</a></li>
+        <li><a href="#using-multiple-templates-in-unit-tests">Using multiple templates in unit tests</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Helm is a good tool to create common templates for your deployments. But when you start writing complex
+templates testing them manually is unpleasure. Could I use TDD (Test-Driven Development) for
+writing Helm Charts?</p>
+<p>Basic testing includes such manual operations as:</p>
+<ol>
+<li>Create <code>test-service-values.yml</code> with test values. Change that file for any case that you want to test.</li>
+<li>Run something like this <code>helm template test-service spring-microservice --namespace esbs -f test-service-values.yml &gt; test-service.yml</code></li>
+<li>Manually check the generated file <code>test-service.yml</code> that it&rsquo;s correct.</li>
+</ol>
+<p>After some investigation I found three approaches to write unit tests for Helm Charts:</p>
+<ol>
+<li>Helm unittest plugin;</li>
+<li>Write test on bash using <code>bats</code> (example <a href="https://github.com/hashicorp/vault-helm/tree/main/test/unit" target="_blank" rel="noopener noreffer">https://github.com/hashicorp/vault-helm/tree/main/test/unit</a>);</li>
+<li>HCUnit <a href="https://github.com/xchapter7x/hcunit" target="_blank" rel="noopener noreffer">https://github.com/xchapter7x/hcunit</a></li>
+</ol>
+<p>I chose the first approach as the most simple and readable. You can read test suite and assertion rules
+on <a href="https://github.com/quintush/helm-unittest/blob/master/DOCUMENT.md#" target="_blank" rel="noopener noreffer">https://github.com/quintush/helm-unittest/blob/master/DOCUMENT.md#</a></p>
+<p>Consider that we have created a basic Helm Chart. We want to add Vault Agent Injector capabilities
+to the Chart.</p>
+<h2 id="using-helm-unittest-plugin">Using Helm unittest plugin</h2>
+<p>Start by installing <code>helm-unittest</code> plugin for Helm.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">helm plugin install https://github.com/quintush/helm-unittest
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For example our <code>deployment.yaml</code> from start was such:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Deployment</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>{{- <span class="l">with .Values.podAnnotations }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>{{- <span class="l">toYaml . | nindent 8 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># ...</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="first-iteration">First iteration</h3>
+<p>First, create a directory called <code>tests</code> inside helm chart root folder. Then inside that folder create
+a file called <code>vault_support_test.yaml</code>. Test files must include suffix <code>_test.yaml</code>. Add <code>tests</code> directory
+into <code>.helmignore</code> file.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">suite</span><span class="p">:</span><span class="w"> </span><span class="l">test Vault Agent integration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">templates</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="l">deployment.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">tests</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should not generate Vault annotations if vault.enabled = false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">isNull</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should set annotations from podAnnotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">test/some-annotation</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;some-value&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nt">test/some-annotation</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;some-value&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">isNull</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject]</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Patterns to ignore when building packages.
+</span></span><span class="line"><span class="cl"># This supports shell glob matching, relative path matching, and
+</span></span><span class="line"><span class="cl"># negation (prefixed with !). Only one pattern per line.
+</span></span><span class="line"><span class="cl">.DS_Store
+</span></span><span class="line"><span class="cl"># ...
+</span></span><span class="line"><span class="cl">tests
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To run tests:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">helm unittest --helm3 spring-microservice
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">### Chart [ spring-microservice ] spring-microservice
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> PASS  test Vault Agent integration     spring-microservice/tests/vault_support_test.yaml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Charts:      1 passed, 1 total
+</span></span><span class="line"><span class="cl">Test Suites: 1 passed, 1 total
+</span></span><span class="line"><span class="cl">Tests:       2 passed, 2 total
+</span></span><span class="line"><span class="cl">Snapshot:    0 passed, 0 total
+</span></span><span class="line"><span class="cl">Time:        59.915078ms
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>You can get an error if you&rsquo;re not using <code>--helm3</code> flag:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">### Error:  apiVersion &#39;v2&#39; is not valid. The value must be &#34;v1&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Charts:      1 failed, 1 errored, 0 passed, 1 total
+</span></span><span class="line"><span class="cl">Test Suites: 0 passed, 0 total
+</span></span><span class="line"><span class="cl">Tests:       0 passed, 0 total
+</span></span><span class="line"><span class="cl">Snapshot:    0 passed, 0 total
+</span></span><span class="line"><span class="cl">Time:        6.379641ms
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now let&rsquo;s add functionality to our Helm Chart step by step using TDD.</p>
+<p>First, add new test to the suite:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should set annotations from podAnnotations and generated Vault annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test/some-annotation</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;some-value&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[test/some-annotation]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;some-value&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">isNotNull</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject]</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>After running test we will get an error:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"> FAIL  test Vault Agent integration     spring-microservice/tests/vault_support_test.yaml
+</span></span><span class="line"><span class="cl">        - should set annotations from podAnnotations and generated Vault annotations
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                - asserts[1] `isNotNull` fail
+</span></span><span class="line"><span class="cl">                        Template:       spring-microservice/templates/deployment.yaml
+</span></span><span class="line"><span class="cl">                        DocumentIndex:  0
+</span></span><span class="line"><span class="cl">                        Path:   spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject]
+</span></span><span class="line"><span class="cl">                        Expected NOT to be null, got:
+</span></span><span class="line"><span class="cl">                                null
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Charts:      1 failed, 0 passed, 1 total
+</span></span><span class="line"><span class="cl">Test Suites: 1 failed, 0 passed, 1 total
+</span></span><span class="line"><span class="cl">Tests:       1 failed, 2 passed, 3 total
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Then we write simple code improvement to implement our new requirement:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">if or .Values.podAnnotations .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">if .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/agent-inject</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">toYaml .Values.podAnnotations | nindent 8 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="second-iteration">Second iteration</h3>
+<p>Now write a new test:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should generate Vault annotations by default</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/agent-inject</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/agent-image</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;registry-test.alfa-bank.kz/esbs/docker-base-images/vault:1.9.2-curl&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/preserve-secret-case</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/ca-cert</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/vault/tls/ca.crt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/tls-secret</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;vault-tls-client&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">vault.hashicorp.com/role</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-test-default-role&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>For that test we will add new values to <code>values.yaml</code>. That values used by default:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">vault</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;registry-test.alfa-bank.kz/esbs/docker-base-images/vault:1.9.2-curl&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-test-default-role&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Running test we will get an error:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"> FAIL  test Vault Agent integration     spring-microservice/tests/vault_support_test.yaml
+</span></span><span class="line"><span class="cl">        - should generate Vault annotations by default
+</span></span><span class="line"><span class="cl">                Error: yaml: line 26: did not find expected key
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Charts:      1 failed, 0 passed, 1 total
+</span></span><span class="line"><span class="cl">Test Suites: 1 failed, 0 passed, 1 total
+</span></span><span class="line"><span class="cl">Tests:       1 failed, 1 errored, 3 passed, 4 total
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>You can see that it&rsquo;s not just failed (means that assertions are failed), but <em>errored</em>. That tells us
+to look at code on line 26. In my example, if <code>.Values.podAnnotations</code> is empty, then this error arises.
+Let&rsquo;s fix it:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">if or .Values.podAnnotations .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">if .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/agent-inject</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/agent-image</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;registry-test.alfa-bank.kz/esbs/docker-base-images/vault:1.9.2-curl&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/preserve-secret-case</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/ca-cert</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/vault/tls/ca.crt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/tls-secret</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;vault-tls-client&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">vault.hashicorp.com/role</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-test-default-role&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">with .Values.podAnnotations }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>{{- <span class="l">toYaml . | nindent 8 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="refactoring">Refactoring</h4>
+<p>Now we can see 4 passed test, without any failed or errored. We can refactor this code to simplify
+maintainability. Create <code>templates/_vault.tpl</code> file with the following content:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{<span class="l">/*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Sets pod annotations with vault injector annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">*/}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">define &#34;spring-boot-microservice.podAnnotations&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>{{- <span class="l">if or .Values.podAnnotations .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>{{- <span class="l">if .Values.vault.enabled }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>{{- <span class="l">include &#34;spring-boot-microservice.vaultAnnotations&#34; . | nindent 8 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>{{- <span class="l">with .Values.podAnnotations }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>{{- <span class="l">toYaml . | nindent 8 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{<span class="l">/*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="l">Sets vault injector annotations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">*/}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">define &#34;spring-boot-microservice.vaultAnnotations&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-inject</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-image</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;registry-test.alfa-bank.kz/esbs/docker-base-images/vault:1.9.2-curl&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/preserve-secret-case</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/ca-cert</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/vault/tls/ca.crt&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/tls-secret</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;vault-tls-client&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/role</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">.Values.vault.role | quote }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>And change <code>templates/deployment.yaml</code> to simple one:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Deployment</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># ...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>{{- <span class="l">template &#34;spring-boot-microservice.podAnnotations&#34; . }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># ...</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="third-iteration">Third iteration</h3>
+<p>Next we need to generate such annotations with Go template as values. Add them to the last test:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">vault.hashicorp.com/agent-inject-secret-config.properties</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-prod/data/test/test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-inject-template-config.properties</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{- with secret &#34;/k8s-prod/data/test/test-service&#34; -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- range $k, $v := .Data.data -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- if not ($k | regexMatch &#34;base64file&#34;) -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- $k }}={{ printf &#34;%s\n&#34; $v -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{- end -}}</span><span class="w">  
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw"></i>Escaping Go Template in Helm Chart<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">To escape Go template in the Helm Chart, we will use the solution from <a href="https://github.com/helm/helm/issues/2798" target="_blank" rel="noopener noreffer">https://github.com/helm/helm/issues/2798</a></div>
+        </div>
+    </div>
+<p>Insert inside <code>templates/_vault.tpl</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">vault.hashicorp.com/agent-inject-secret-config.properties</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-prod/data/test/test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-inject-template-config.properties</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{`{{- with secret &#34;/k8s-prod/data/test/test-service&#34; -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- range $k, $v := .Data.data -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- if not ($k | regexMatch &#34;base64file&#34;) -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- $k }}={{ printf &#34;%s\n&#34; $v -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{- end -}}`}}</span><span class="w">  
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="forth-iteration">Forth iteration</h3>
+<p>Rewrite <code>.Release.Name</code> for our last test, and set <code>fullnameOverride</code> value:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should generate Vault annotations by default</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">release</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">test</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#...</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Change <code>templates/_vault.tpl</code> like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">define &#34;spring-boot-microservice.vaultAnnotations&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-inject-secret-config.properties</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">include &#34;spring-boot-microservice.vaultSecretPath&#34; . }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vault.hashicorp.com/agent-inject-template-config.properties</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{`{{- with secret &#34;/k8s-prod/data/test/test-service&#34; -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- range $k, $v := .Data.data -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- if not ($k | regexMatch &#34;base64file&#34;) -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- $k }}={{ printf &#34;%s\n&#34; $v -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">    {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">  {{- end -}}`}}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{<span class="l">/* Get Vault secret path */}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">define &#34;spring-boot-microservice.vaultSecretPath&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">printf &#34;%s/data/%s/%s&#34; &#34;k8s-prod&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="l">.Release.Namespace</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="l">(include &#34;spring-microservice.fullname&#34; . ) }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="fifth-iteration">Fifth iteration</h3>
+<p>Now we want to define Vault KV secret based on <code>environment</code> variable. If it set to <code>prod</code>, <code>k8s-prod</code> KV
+should be used.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should use Vault KV based on environment setting</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">release</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">test-ns</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="l">prod</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject-secret-config.properties]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-prod/data/test-ns/test-service&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Add the following configuration settings into <code>values.yaml</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="l">prod</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">vaultKV</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-test&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">prod</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;k8s-prod&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Update <code>templates/_vault.tpl</code> in a such way:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">define &#34;spring-boot-microservice.vaultSecretPath&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">printf &#34;%s/data/%s/%s&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="l">(include &#34;spring-boot-microservice.vaultKV&#34; . )</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="l">.Release.Namespace</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="l">(include &#34;spring-microservice.fullname&#34; . ) }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{<span class="l">/*</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">Define Vault KV (key-value) engine based on selected environment (test|prod)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">*/}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">define &#34;spring-boot-microservice.vaultKV&#34; -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">if .Values.environment }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">default &#34;&#34; (printf &#34;%s&#34; (index .Values.vaultKV .Values.environment)) }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="templates-issues">Templates issues</h3>
+<p>Suppose that we want to use predefined templates for Vault templating. And that templates will be not
+Strings, but another template that we evaluate using <code>tpl</code> function. For example, our <code>values.yaml</code>
+will be changed:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">vault</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">files</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">config.properties</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretPath</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;{{ include &#34;spring-boot-microservice.vaultSecretPath&#34; . }}&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">useTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;kv&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">templates</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">kv</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{`{{- with secret`}} {{ .secretPath | quote }} {{`-}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- range $k, $v := .Data.data -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">          {{- if not ($k | regexMatch &#34;base64file&#34;) -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">            {{- $k }}={{ printf &#34;%s\n&#34; $v -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">          {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- end -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- end -}}`}}</span><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{`{{- with secret` }} {{ .secretPath | quote }} {{ `-}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">        {{- base64Decode (index .Data.data `}}{{ .secretKey | quote }}{{`) }}
+</span></span></span><span class="line"><span class="cl"><span class="sd">      {{- end -}}`}}</span><span class="w">      
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>As you can see, <code>vault.templates.kv</code> contains <code>.secretPath</code> variable, and <code>vault.templates.file</code>
+additionally evaluates <code>.secretKey</code> variable. The values of that variables should be gotten from
+<code>vault.files.*.secretPath</code> and <code>vault.files.*.secretKey</code> respectively.</p>
+<p>Let&rsquo;s write a test:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should set Vault annotations to load a binary file</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">release</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">test-ns</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">vault.files</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">GOST_cert.p12</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secretPath</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/k8s-prod/data/test-ns/test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secretKey</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;service.eds.base64file&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">useTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;file&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject-secret-GOST_cert.p12]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/k8s-prod/data/test-ns/test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject-template-GOST_cert.p12]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">          {{- with secret &#34;/k8s-prod/data/test-ns/test-service&#34; -}}
+</span></span></span><span class="line"><span class="cl"><span class="sd">            {{- base64Decode (index .Data.data &#34;service.eds.base64file&#34;) }}
+</span></span></span><span class="line"><span class="cl"><span class="sd">          {{- end -}}</span><span class="w">          
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.metadata.annotations.[vault.hashicorp.com/agent-inject-secret-config.properties]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;/k8s-prod/data/test-ns/test-service&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Trying to implement such logic, we can try this snippet:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">range $fileName, $secretParams := .Values.vault.files }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{<span class="w"> </span><span class="l">tpl (index $.Values.vault.templates (index $secretParams &#34;useTemplate&#34;))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">(dict &#34;secretPath&#34; (tpl $secretParams.secretPath $)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="s2">&#34;secretKey&#34;</span><span class="w"> </span><span class="l">$secretParams.secretKey</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">) | indent 2 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>We can send to the <code>tpl</code> function dictionary (map) of key-values, that will be used in the final
+template. But we will get errors:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">- should set Vault annotations to load a binary file
+</span></span><span class="line"><span class="cl">                Error: template: spring-microservice/templates/_vault.tpl:8:14: executing &#34;spring-boot-microservice.podAnnotations&#34; at &lt;include &#34;spring-boot-microservice.vaultAnnotations&#34; .&gt;: error calling include: template: spring-microservice/templates/_vault.tpl:34:3: executing &#34;spring-boot-microservice.vaultAnnotations&#34; at &lt;tpl (index $.Values.vault.templates (index $secretParams &#34;useTemplate&#34;)) (dict &#34;secretPath&#34; (tpl $secretParams.secretPath $) &#34;secretKey&#34; $secretParams.secretKey)&gt;: error calling tpl: cannot retrieve Template.Basepath from values inside tpl function: {{`{{- with secret` }} {{ .secretPath | quote }} {{ `-}}
+</span></span><span class="line"><span class="cl">  {{- base64Decode (index .Data.data `}}{{ .secretKey | quote }}{{`) }}
+</span></span><span class="line"><span class="cl">{{- end -}}`}}
+</span></span><span class="line"><span class="cl">: &#34;BasePath&#34; is not a value
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The solution has been found on <a href="https://github.com/helm/helm/issues/5979#issuecomment-704740061" target="_blank" rel="noopener noreffer">https://github.com/helm/helm/issues/5979#issuecomment-704740061</a>.
+We need to send extra argument <code>&quot;Template&quot; $.Template</code> to <code>tpl</code> function. Fixed code looks like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">range $fileName, $secretParams := .Values.vault.files }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">$useTemplate := index $secretParams &#34;useTemplate&#34; }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">$secretPath := (tpl $secretParams.secretPath $) }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">vault.hashicorp.com/agent-inject-secret-{{ $fileName }}: {{ $secretPath }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="l">vault.hashicorp.com/agent-inject-template-{{ $fileName }}: |</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{<span class="w"> </span><span class="l">tpl (index $.Values.vault.templates $useTemplate)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="l">(dict &#34;secretPath&#34; $secretPath</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="s2">&#34;secretKey&#34;</span><span class="w"> </span><span class="l">$secretParams.secretKey</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="s2">&#34;Template&#34;</span><span class="w"> </span><span class="l">$.Template) | indent 2 }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="using-multiple-templates-in-unit-tests">Using multiple templates in unit tests</h3>
+<p>Previously in our test suite we have specified only one <code>deployment.yaml</code> in the list <code>templates</code>. That
+means only one template will be generated for tests.</p>
+<p>Consider a case when we want to generate <code>ServiceAccount</code> even if <code>serviceAccount.create</code> disabled
+but <code>vault.enabled</code> is true. If we specify new test like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should enable serviceAccount when vault is enabled</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">serviceAccount.create</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">containsDocument</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ServiceAccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">test-service</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">serviceaccount.yaml</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>It will fail with an error:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">- asserts[1] `containsDocument` fail
+</span></span><span class="line"><span class="cl">    Error:
+</span></span><span class="line"><span class="cl">            template &#34;spring-microservice/templates/serviceaccount.yaml&#34; not exists or not selected in test suite
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This error tells us that when you specify <code>template</code> value for specific assert or test, it must be
+included in the list of <code>templates</code> in a test suite. So to not overwrite previous tests, that used
+only <code>deployment.yaml</code> we will create separate test suite <code>tests/serviceaccount_test.yaml</code>.
+It contains all variations of configuration settings that we want:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">suite</span><span class="p">:</span><span class="w"> </span><span class="l">test ServiceAccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">templates</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="l">deployment.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="l">serviceaccount.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">tests</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should enable serviceAccount when vault is enabled</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">serviceAccount.create</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.spec.serviceAccountName</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;test-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">deployment.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">containsDocument</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ServiceAccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">test-service</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">serviceaccount.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should create serviceAccount when serviceAccount.create enabled</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">fullnameOverride</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;another-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">serviceAccount.create</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.spec.serviceAccountName</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;another-service&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">deployment.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">containsDocument</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ServiceAccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">another-service</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">serviceaccount.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">it</span><span class="p">:</span><span class="w"> </span><span class="l">should not create serviceAccount when serviceAccount.create disabled</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">set</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">serviceAccount.create</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">vault.enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">asserts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">equal</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">spec.template.spec.serviceAccountName</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;default&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">deployment.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">hasDocuments</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l">serviceaccount.yaml</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Another trick to implement such behaviour is setting value of <code>serviceAccount.create</code> to <code>true</code>
+if <code>vault.enabled</code> is <code>true</code> using <code>set</code> function:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl">{{- <span class="l">if .Values.vault.enabled -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">$_ := set .Values.serviceAccount &#34;create&#34; true }}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">if .Values.serviceAccount.create -}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">ServiceAccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>{{- <span class="l">end }}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on Mar 03, 2022</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://lsnotes.com/2022/03/helm-unit-testing/" data-title="Unit Testing for Helm Charts" data-via="XandrCherepanov" data-hashtags="Helm,Unit Testing"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://lsnotes.com/2022/03/helm-unit-testing/"><i class="fab fa-linkedin fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/helm/">Helm</a>,&nbsp;<a href="/tags/unit-testing/">Unit Testing</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2016/01/preparation-oca-java8-exam/" class="prev" rel="prev" title="Preparation for the OCA Java SE 8 Programmer I Exam"><i class="fas fa-angle-left fa-fw"></i>Preparation for the OCA Java SE 8 Programmer I Exam</a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.96.0">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2015 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">Alexandr Cherepanov</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/lightgallery/lightgallery.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lightgallery.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-thumbnail.min.js"></script><script type="text/javascript" src="/lib/lightgallery/lg-zoom.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/typeit/typeit.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":10},"comment":{},"data":{"id-1":"ls notes/","id-2":"ls notes/"},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

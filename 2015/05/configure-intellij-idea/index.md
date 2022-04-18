@@ -3,28 +3,29 @@
 
 ## Basic shotcuts for comfortable work in IntelliJ IDEA
 
-| Shortcut 			| New Shortcut 	| Command name
-| :---------------: | :-----------: | ------------
-| ⇧⌘O 				|  ⌘P  			| Navigate → File...
-| ⌘F12  			|  ⌘R  			| Navigate → File Structure
-| ⌘E				| 				| View → Recent Files
-| ⌘⌘				|				| View → Tool Buttons
-| ⌃⇥				|				| Switcher
-| ⇧⎋				| 				| Hide Active Tool Window
-| ⇧⇧				|				| Search Everywhere
-| ⇧⌘A				|				| Find Action...
-| ⌘↑				|				| Navigate → Jump to Navigation Bar
-| ⌘N				|				| New File... or Generate Code...
-| ⌥⇧ Button1 Click 	|  				| Add or Remove Caret
-| ⌃G				| ⌘D			| Add Selection for Next Occurrence
-| 					| ⌃V			| Split Vertically
-| 					| ⌃H			| Split Horizontally
-| ⌘W				|				| Close Tab
-| ⌘,				|				| Open Preferences...
-| ⌘;				|				| Project Structure...
-| ⌥⏎				|				| Show Intention Actions
-| ⇧⌘D				|				| Search in Dash (need Dash plugin)
 
+
+|     Shortcut     | New Shortcut | Command name                      |
+|:----------------:|:------------:|-----------------------------------|
+|       ⇧⌘O        |      ⌘P      | Navigate → File...                |
+|       ⌘F12       |      ⌘R      | Navigate → File Structure         |
+|        ⌘E        |              | View → Recent Files               |
+|        ⌘⌘        |              | View → Tool Buttons               |
+|        ⌃⇥        |              | Switcher                          |
+|        ⇧⎋        |              | Hide Active Tool Window           |
+|        ⇧⇧        |              | Search Everywhere                 |
+|       ⇧⌘A        |              | Find Action...                    |
+|        ⌘↑        |              | Navigate → Jump to Navigation Bar |
+|        ⌘N        |              | New File... or Generate Code...   |
+| ⌥⇧ Button1 Click |              | Add or Remove Caret               |
+|        ⌃G        |      ⌘D      | Add Selection for Next Occurrence |
+|        	         |      ⌃V      | Split Vertically                  |
+|        	         |      ⌃H      | Split Horizontally                |
+|        ⌘W        |              | Close Tab                         |
+|        ⌘,        |              | Open Preferences...               |
+|        ⌘;        |              | Project Structure...              |
+|        ⌥⏎        |              | Show Intention Actions            |
+|       ⇧⌘D        |              | Search in Dash (need Dash plugin) |
 
 {{< admonition note "Keys" true >}}
 ⇧ - Shift<br/>
@@ -44,9 +45,11 @@ Some plugins for IntelliJ IDEA that you may like:
 
 - **Markdown** adds syntax highlighting and preview for markdown files (*.md).
 
-- **IdeaVim** - Vim emulation plug-in for IDEs based on the IntelliJ platform. IdeaVim supports many Vim features including normal/insert/visual modes, motion keys, deletion/changing, marks and others.
+- **IdeaVim** - Vim emulation plug-in for IDEs based on the IntelliJ platform. IdeaVim supports many 
+  Vim features including normal/insert/visual modes, motion keys, deletion/changing, marks and others.
 
-- **Dash** - A smart and simple plugin that provides keyboard shortcut access for Dash, Velocity or Zeal in IntelliJ IDEA
+- **Dash** - A smart and simple plugin that provides keyboard shortcut access for Dash, 
+  Velocity or Zeal in IntelliJ IDEA
 
 And enjoy watching!
 
