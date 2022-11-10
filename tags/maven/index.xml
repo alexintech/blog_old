@@ -8,8 +8,9 @@
     <title>Основы использования Maven</title>
     <link>https://lsnotes.com/2015/05/basic-usage-of-maven/</link>
     <pubDate>Tue, 05 May 2015 00:00:00 &#43;0000</pubDate>
-    <author>Author</author>
+    <author>Alexandr Cherepanov</author>
     <guid>https://lsnotes.com/2015/05/basic-usage-of-maven/</guid>
     <description><![CDATA[В видео рассматривается установка Maven на Mac OS X с помощью пакетного менеджера Homebrew, создание простого проекта в IntelliJ IDEA и использование Maven в IntelliJ IDEA для компиляции проекта.]]></description>
-</item></channel>
+</item>
+</channel>
 </rss>

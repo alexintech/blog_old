@@ -8,10 +8,11 @@
     <title>Unit Testing for Helm Charts</title>
     <link>https://lsnotes.com/2022/03/helm-unit-testing/</link>
     <pubDate>Tue, 22 Mar 2022 00:00:00 &#43;0000</pubDate>
-    <author>Author</author>
+    <author>Alexandr Cherepanov</author>
     <guid>https://lsnotes.com/2022/03/helm-unit-testing/</guid>
     <description><![CDATA[<p>Helm is a good tool to create common templates for your deployments. But when you start writing complex
 templates testing them manually is unpleasure. Could I use TDD (Test-Driven Development) for
 writing Helm Charts?</p>]]></description>
-</item></channel>
+</item>
+</channel>
 </rss>
