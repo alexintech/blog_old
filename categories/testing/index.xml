@@ -1,0 +1,16 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>testing - Category - ls notes</title>
+        <link>https://lsnotes.com/categories/testing/</link>
+        <description>testing - Category - ls notes</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</managingEditor>
+            <webMaster>xandr.cherepanov@gmail.com (Alexandr Cherepanov)</webMaster><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 21 Nov 2022 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://lsnotes.com/categories/testing/" rel="self" type="application/rss+xml" /><item>
+    <title>Build ARM64 (M1) Chromium Docker image for Selenoid</title>
+    <link>https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/</link>
+    <pubDate>Mon, 21 Nov 2022 00:00:00 &#43;0000</pubDate>
+    <author>Alexandr Cherepanov</author>
+    <guid>https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/</guid>
+    <description><![CDATA[Selenoid is a powerful Golang implementation of original Selenium hub code. It is using Docker to launch browsers. But currently it does not provide browser images for ARM64 architecture used in new M1 Mac. In this article we will build chromium images for Selenoid usage.]]></description>
+</item>
+</channel>
+</rss>

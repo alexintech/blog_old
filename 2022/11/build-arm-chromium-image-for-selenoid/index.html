@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Build ARM64 (M1) Chromium Docker image for Selenoid - ls notes</title><meta name="Description" content="Alexander Cherepanov&#39;s Personal blog."><meta property="og:title" content="Build ARM64 (M1) Chromium Docker image for Selenoid" />
+<meta property="og:description" content="Selenoid is a powerful Golang implementation of original Selenium hub code. It is using Docker to launch browsers. But currently it does not provide browser images for ARM64 architecture used in new M1 Mac. In this article we will build chromium images for Selenoid usage." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/" /><meta property="og:image" content="https://lsnotes.com/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-11-21T00:00:00+00:00" />
+<meta property="article:modified_time" content="2022-11-21T00:00:00+00:00" /><meta property="og:site_name" content="ls notes" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://lsnotes.com/logo.png"/>
+
+<meta name="twitter:title" content="Build ARM64 (M1) Chromium Docker image for Selenoid"/>
+<meta name="twitter:description" content="Selenoid is a powerful Golang implementation of original Selenium hub code. It is using Docker to launch browsers. But currently it does not provide browser images for ARM64 architecture used in new M1 Mac. In this article we will build chromium images for Selenoid usage."/>
+<meta name="application-name" content="LS Notes">
+<meta name="apple-mobile-web-app-title" content="LS Notes"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/" /><link rel="prev" href="https://lsnotes.com/2022/03/helm-unit-testing/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Build ARM64 (M1) Chromium Docker image for Selenoid",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/lsnotes.com\/2022\/11\/build-arm-chromium-image-for-selenoid\/"
+        },"genre": "posts","keywords": "Selenoid, DevOps","wordcount":  427 ,
+        "url": "https:\/\/lsnotes.com\/2022\/11\/build-arm-chromium-image-for-selenoid\/","datePublished": "2022-11-21T00:00:00+00:00","dateModified": "2022-11-21T00:00:00+00:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "Alexander Cherepanov"},"author": {
+                "@type": "Person",
+                "name": "Alexandr Cherepanov"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="ls notes"><span class="header-title-pre">> </span><span id="id-1" class="typeit"></span></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/tags/"> Tags </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><a class="menu-item" href="https://github.com/alexintech" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="ls notes"><span class="header-title-pre">> </span><span id="id-2" class="typeit"></span></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/tags/" title="">Tags</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a class="menu-item" href="https://github.com/alexintech" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Build ARM64 (M1) Chromium Docker image for Selenoid</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel="author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Alexandr Cherepanov</a></span>&nbsp;<span class="post-category">included in <a href="/categories/testing/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>testing</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="Nov 11, 2022">Nov 11, 2022</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;427 words&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;3 minutes&nbsp;</div>
+        </div><div class="content" id="content"><p>Selenoid is a powerful Golang implementation of original Selenium hub code.
+It is using Docker to launch browsers.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<h2 id="problem-overview">Problem overview</h2>
+<p>Selenoid provides <a href="https://aerokube.com/images/latest/#_chrome" target="_blank" rel="noopener noreffer ">Chrome browser images</a>,
+but they are available only for <code>linux/amd64</code> architecture. If you try to use that images
+on Mac M1 it will use an emulation to support different architecture and it will be much
+slower than it can be.</p>
+<figure><a class="lightgallery" href="/posts/chrome-image.png" title="/posts/chrome-image.png" data-thumbnail="/posts/chrome-image.png" data-sub-html="<h2>selenoid/chrome image architecture</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/posts/chrome-image.png"
+            data-srcset="/posts/chrome-image.png, /posts/chrome-image.png 1.5x, /posts/chrome-image.png 2x"
+            data-sizes="auto"
+            alt="/posts/chrome-image.png" />
+    </a><figcaption class="image-caption">selenoid/chrome image architecture</figcaption>
+    </figure>
+<p>Fortunately, <em>sskorol</em> already implemented <a href="https://github.com/aerokube/images/pull/524" target="_blank" rel="noopener noreffer ">Initial Chromium image support for arm64 #524</a>.</p>
+<p>You may ask <em>why Chromium and not Chrome</em>? And the answer is because Selenoid images are
+base on Ubuntu images. But Google does not provide Chrome ARM64 for Linux. There&rsquo;s only
+Chromium is available for ARM64 Linux distributions.</p>
+<p>Next, you may ask <em>why this image is based on Ubuntu 18.04</em>? I don&rsquo;t have an answer why
+an old LTS Ubuntu 18.04 receives the latest Chromium updates and new LTS Ubuntu 22.04 does not.
+But you can see it at <a href="https://packages.ubuntu.com/search?suite=bionic-updates&amp;searchon=names&amp;keywords=chromium" target="_blank" rel="noopener noreffer ">Ubuntu packages</a></p>
+<figure><a class="lightgallery" href="/posts/ubuntu-packages.png" title="/posts/ubuntu-packages.png" data-thumbnail="/posts/ubuntu-packages.png" data-sub-html="<h2>Chromium Ubuntu packages</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/posts/ubuntu-packages.png"
+            data-srcset="/posts/ubuntu-packages.png, /posts/ubuntu-packages.png 1.5x, /posts/ubuntu-packages.png 2x"
+            data-sizes="auto"
+            alt="/posts/ubuntu-packages.png" />
+    </a><figcaption class="image-caption">Chromium Ubuntu packages</figcaption>
+    </figure>
+<ol>
+<li>That&rsquo;s Chromium package that we need</li>
+<li>The latest Chromium version in Ubuntu jammy (22.04 LTS) is 85.0. It does not have updates.</li>
+</ol>
+<p>You may ask maybe someone already have built an appropriate image for Selenoid? Unfortunately,
+earlier mentioned <em>sskorol</em> has built an image only for <a href="https://hub.docker.com/r/sskorol/selenoid_chromium_vnc/tags" target="_blank" rel="noopener noreffer ">chromium 100.0</a>.</p>
+<p>So, we are supposed to build a Docker image ourselves.</p>
+<h2 id="docker-image-generation">Docker image generation</h2>
+<p><strong>Prerequisites:</strong></p>
+<ol>
+<li>You need installed Go: <code>brew install go</code></li>
+<li>You need installed Maven (to run tests on built image): <code>brew install mvn</code> or <code>sdk install maven</code></li>
+</ol>
+<p>First, clone <a href="https://github.com/aerokube/images.git" target="_blank" rel="noopener noreffer ">Selenoid Browser images repo</a>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ git clone https://github.com/aerokube/images.git selenoid-images
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> selenoid-images
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Then build Chromium images using the following command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ ./build-chromium.sh 107.0.5304.87-0ubuntu11.18.04.1 chromium_107.0 7.4.0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>where:</p>
+<ul>
+<li><code>107.0.5304.87-0ubuntu11.18.04.1</code> is actual Chromium Ubuntu package version from <a href="https://packages.ubuntu.com/search?suite=bionic-updates&amp;searchon=names&amp;keywords=chromium" target="_blank" rel="noopener noreffer ">Ubuntu packages</a>;</li>
+<li><code>chromium_107.0</code> is a tag for generated Docker image. The whole image name will be <code>selenoid/vnc:chromium_107.0</code>;</li>
+<li><code>7.4.0</code> is base image tag. Base image also builds with a script. Base image version for chromium image generation
+can be found at <code>static/chromium/local/Dockerfile</code>.</li>
+</ul>
+<p>After executing that command <code>selenoid/vnc:chromium_107.0</code> should be generated. All tests should pass.</p>
+<div class="details admonition tip open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-lightbulb fa-fw" aria-hidden="true"></i>Tip<i class="details-icon fas fa-angle-right fa-fw" aria-hidden="true"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">If some tests fail, try to clean your Docker (remove all containers and delete all selenoid related images).</div>
+        </div>
+    </div>
+<h2 id="pushing-docker-image-and-usage-with-selenoid">Pushing Docker image and usage with Selenoid</h2>
+<p>You can tag generated Docker image and push to your private/personal registry:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ docker tag selenoid/vnc:chromium_107.0 xandrcherepanov/selenoid_vnc:chromium_107.0
+</span></span><span class="line"><span class="cl">$ docker push xandrcherepanov/selenoid_vnc:chromium_107.0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now we can use our image in <code>browsers.json</code> like:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;chrome&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;default&#34;</span><span class="p">:</span> <span class="s2">&#34;107.0&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;versions&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;107.0&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;image&#34;</span><span class="p">:</span> <span class="s2">&#34;xandrcherepanov/selenoid_vnc:chromium_107.0&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;port&#34;</span><span class="p">:</span> <span class="s2">&#34;4444&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;cpu&#34;</span><span class="p">:</span> <span class="s2">&#34;1.0&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p><a href="https://aerokube.com/selenoid/latest/" target="_blank" rel="noopener noreffer ">https://aerokube.com/selenoid/latest/</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on Nov 11, 2022</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/" data-title="Build ARM64 (M1) Chromium Docker image for Selenoid" data-via="XandrCherepanov" data-hashtags="Selenoid,DevOps"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Linkedin" data-sharer="linkedin" data-url="https://lsnotes.com/2022/11/build-arm-chromium-image-for-selenoid/"><i class="fab fa-linkedin fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/selenoid/">Selenoid</a>,&nbsp;<a href="/tags/devops/">DevOps</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2022/03/helm-unit-testing/" class="prev" rel="prev" title="Unit Testing for Helm Charts"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Unit Testing for Helm Charts</a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.106.0">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2015 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">Alexandr Cherepanov</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/css/lightgallery-bundle.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery@2.5.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/typeit@8.6.0/dist/index.umd.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":10},"comment":{},"data":{"id-1":"ls notes/","id-2":"ls notes/"},"lightgallery":true,"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"},"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"id-1":["id-1"],"id-2":["id-2"]},"duration":-1,"speed":100}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
